@@ -37,7 +37,7 @@ function handleError(err, res) {
 //Helper functions
 function searchToLatLong(query) {
 	const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
-// console.log(url);
+console.log(url);
 	return superagent.get(url)
 	.then(res => {
 		// console.log(res.body);
@@ -77,11 +77,11 @@ function getYelp(request, response) {
 function getMovies(request, response) {
 	const url = `https://api.themoviedb.org/3/search/movie?query=${request.query.data.search_query}&api_key=${process.env.MOVIEDB_API_KEY}`
 	// const url = `https://api.themoviedb.org/3/search/movie?/api_key=${process.env.MOVIEDB_API_KEY}&query=${request.query.data.search_query}`;
-	console.log('this is the url', url);
-	console.log('this the is search_query', request.query.data.search_query)
+	// console.log('this is the url', url);
+	// console.log('this the is search_query', request.query.data.search_query)
 	superagent.get(url)
 	.then(result => {
-		console.log(result.body.results);
+		// console.log(result.body.results);
 		const movieSet = result.body.results.map( movie => {
 			return new Movie(movie);
 		});
