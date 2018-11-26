@@ -154,7 +154,7 @@ function Meetup(meetup) {
 	this.link = meetup.link;
 	this.name = meetup.name;
 	this.host = meetup.group.name;
-	this.creation_date = meetup.created;
+	this.creation_date = new Date(meetup.created).toString().slice(0,15);
 }
 
 function Trail (trail){
