@@ -28,6 +28,10 @@ app.get('/yelp', getYelp);
 
 app.get('/movies', getMovies);
 
+app.get('/meetups', getMeetup);
+
+// app.get('/trails', getTrails);
+
 //Error Handling
 function handleError(err, res) {
 	console.error(err);
@@ -37,7 +41,7 @@ function handleError(err, res) {
 //Helper functions
 function searchToLatLong(query) {
 	const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
-console.log(url);
+// console.log(url);
 	return superagent.get(url)
 	.then(res => {
 		// console.log(res.body);
@@ -90,6 +94,26 @@ function getMovies(request, response) {
 	.catch(error => handleError(error, response));
 }
 
+function getMeetup(request, response){  //https://api.meetup.com/find/upcoming_events?key=4d544e46124361327a32401768346232&lon=-122.3&page=20&lat=47.6
+	const url = `https://api.meetup.com/find/upcoming_events?key=${process.env.MEETUP_API_KEY}&lon=${request.query.data.longitude}&page=20&lat=${request.query.data.latitude}`
+console.log('url', url);
+	superagent.get(url)
+	.then(result => {
+console.log(result.body);
+		const meetups = result.body.events.map( meetup => {
+			return new Meetup(meetup);
+		});
+	response.send(meetups);
+	})
+	.catch(error => handleError(error, response));
+}
+
+// function getTrails(request, response){
+// 	const url = `https://www.hikingproject.com/data/get-trails?lat=${request.query.data.latitude}&lon=${request.query.data.longitude}&maxDistance=10&key=${process.env.HIKING_PROJECT_API_KEY}`
+// 	console.log('url is', url);
+// 	superagent.get(url)
+// }
+
 function handleError(error, res){
 	console.error(error);
 	if (res) res.status(500).send('Sorry, something broke');
@@ -126,6 +150,14 @@ function Movie(movie) {
 	this.overview = movie.overview;
 	this.popularity = movie.popularity
 }
+
+function Meetup(meetup) {
+	this.link = meetup.link;
+	this.name = meetup.name;
+	this.host = meetup.group.name;
+	this.creation_date = meetup.created;
+}
+
 
 //make sure the server is listening for requests.
 app.listen(PORT, () => console.log(`App is up on ${PORT}`));

@@ -16,13 +16,25 @@ Samm Hamm
 Adam Wittnam
 Heather Cherwaty
 Brent Woodward
+Becca Lee -API help
 
 ## Number and name of feature: Add Meetup API
 
 Estimate of time needed to complete: 1 hour
 
-Start time: ______
+Start time: 10 am
+
+Finish time:  11:13 am
+
+Actual time needed to complete: 1 hour 13 min
+
+## Number and name of feature: Add Trails API
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 11:20 am
 
 Finish time:  ____
 
 Actual time needed to complete: _____
+
