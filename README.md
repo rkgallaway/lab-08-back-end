@@ -38,3 +38,13 @@ Finish time:  12:00 pm
 
 Actual time needed to complete: 40 min
 
+## Number and name of feature: add caching/SQL for weather and location
+
+Estimate of time needed to complete: 1.5 hour
+
+Start time: 10:20 am
+
+Finish time:  ______
+
+Actual time needed to complete: 
+
