@@ -15,3 +15,14 @@ CREATE TABLE IF NOT EXISTS weathers (
     created_at BIGINT,
     location_id INTEGER NOT NULL REFERENCES locations(id)
   );
+
+  CREATE TABLE IF NOT EXISTS yelps (
+      id SERIAL PRIMARY KEY,
+      url VARCHAR(255),
+      name VARCHAR(255),
+      rating VARCHAR(255),
+      price VARCHAR(255),
+      image_url VARCHAR(255),
+      created_at BIGINT,
+      location_id INTEGER NOT NULL REFERENCES locations(id)
+  );
