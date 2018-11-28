@@ -32,7 +32,7 @@ app.get('/location', getLocation);
 
 app.get('/weather', getWeather);
 
-// app.get('/yelp', getYelp);
+app.get('/yelp', getYelp);
 
 // app.get('/movies', getMovies);
 
@@ -106,6 +106,30 @@ Weather.prototype = {
 
     client.query(SQL, values);
   }
+}
+
+//Yelp model
+function Yelp(restaurant) {
+	this.tableName = 'yelps';
+	this.url = restaurant.url;
+	this.name = restaurant.name;
+	this.rating = restaurant.rating;
+	this.price = restaurant.price;
+	this.image_url = restaurant.image_url;
+	this.created_at = Date.now();
+}
+
+Yelp.tableName = 'yelps';
+Yelp.lookup = lookup;
+Yelp.deleteByLocationId = deleteByLocationId;
+
+Yelp.prototype = {
+	save: function (location_id){
+		const SQL = `INSERT INTO ${this.tableName} (url, name, rating, price, image_url, created_at, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+		const values = [this.url, this.name, this.rating, this.price, this.image_url, this.created_at, location_id];
+
+		client.query(SQL, values);
+	}
 }
 
 // ++++++++++++ HELPERS +++++++++++++++
@@ -189,17 +213,53 @@ function getWeather(request, response) {
 
       return superagent.get(url)
         .then(result => {
-          const weatherSummaries = result.body.daily.data.map(day => {
+          const yelpReviews = result.body.daily.data.map(day => {
             const summary = new Weather(day);
             summary.save(request.query.data.id);
             return summary;
           });
-          response.send(weatherSummaries);
+          response.send(yelpReviews);
         })
         .catch(error => handleError(error, response));
     }
   })
 }
+
+//Yelp Handler
+function getYelp(request, response) {
+  Yelp.lookup({
+    tableName: Yelp.tableName,
+
+    location: request.query.data.id,
+
+    cacheHit: function (result) {
+      let ageOfResultsInMinutes = (Date.now() - result.rows[0].created_at) / (1000 * 60 * 60 * 24);
+      if (ageOfResultsInMinutes > 7) {
+        Yelp.deleteByLocationId(Yelp.tableName, request.query.data.id);
+        this.cacheMiss();
+      } else {
+        response.send(result.rows);
+      }
+    },
+
+    cacheMiss: function () {
+			const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
+
+			return superagent.get(url)
+			.set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+        .then(result => {
+          const yelpBusinesses = result.body.businesses.map(restaurant => {
+            const business = new Yelp(restaurant);
+            business.save(request.query.data.id);
+            return business;
+          });
+          response.send(yelpBusinesses);
+        })
+        .catch(error => handleError(error, response));
+    }
+  })
+}
+
 
 
 //Helper functions
@@ -226,13 +286,13 @@ function getWeather(request, response) {
 // }
 
 // function getYelp(request, response) {
-// 	const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
+	// const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
 
 // 	superagent.get(url)
-// 	.set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+	// .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
 // 	.then( result => {
-// 		const yelpBusinesses = result.body.businesses.map(restaurant => {
-// 			return new Yelp(restaurant);
+		// const yelpBusinesses = result.body.businesses.map(restaurant => {
+		// 	return new Yelp(restaurant);
 // 		});
 // 	response.send(yelpBusinesses);
 // 	})
@@ -297,11 +357,11 @@ function getWeather(request, response) {
 // }
 
 // function Yelp(restaurant) {
-// 	this.url = restaurant.url;
-// 	this.name = restaurant.name;
-// 	this.rating = restaurant.rating;
-// 	this.price = restaurant.price;
-// 	this.image_url = restaurant.image_url;
+	// this.url = restaurant.url;
+	// this.name = restaurant.name;
+	// this.rating = restaurant.rating;
+	// this.price = restaurant.price;
+	// this.image_url = restaurant.image_url;
 // }
 
 // function Movie(movie) {
